@@ -178,4 +178,4 @@ def recommendate(request):
     new_transaction = set(product_id_cart)
     recommendations = recommend(rules, new_transaction)
 
-    return JsonResponse({"userId": search_query, "productId": recommendations}, safe=False)
+    return HttpResponse({"userId": search_query, "productId": recommendations}, safe=False)

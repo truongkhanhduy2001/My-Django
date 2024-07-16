@@ -15,7 +15,9 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-COR_ALLOWED_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'https://book-store-eight-psi.vercel.app',
+]
 
 
 # Quick-start development settings - unsuitable for production
