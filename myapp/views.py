@@ -19,7 +19,7 @@ class TreeNode:
         self.count += count
 
 def update_header(node, target):
-    while node.node_link is not None:
+    while node.node_link:
         node = node.node_link
     node.node_link = target
 
@@ -36,53 +36,45 @@ def update_tree(items, root, header, count):
         update_tree(items[1:], root.children[items[0]], header, count)
 
 def create_tree(transactions, min_support):
-    header = {}
+    header = defaultdict(int)
     for trans in transactions:
         for item in trans:
-            header[item] = header.get(item, 0) + transactions[trans]
-    for item in list(header):
-        if header[item] < min_support:
-            del(header[item])
+            header[item] += transactions[trans]
+    header = {k: [v, None] for k, v in header.items() if v >= min_support}
     freq_items = set(header.keys())
-    if len(freq_items) == 0:
+    if not freq_items:
         return None, None
-    for item in header:
-        header[item] = [header[item], None]
     root = TreeNode('Null', 1, None)
     for trans, count in transactions.items():
-        local_items = {}
-        for item in trans:
-            if item in freq_items:
-                local_items[item] = header[item][0]
-        if len(local_items) > 0:
+        local_items = {item: header[item][0] for item in trans if item in freq_items}
+        if local_items:
             ordered_items = [v[0] for v in sorted(local_items.items(), key=lambda p: p[1], reverse=True)]
             update_tree(ordered_items, root, header, count)
     return root, header
 
 def ascend_tree(node, path):
-    if node.parent is not None:
+    if node.parent:
         path.append(node.name)
         ascend_tree(node.parent, path)
 
 def find_prefix_path(base_item, node):
-    patterns = {}
-    while node is not None:
+    patterns = defaultdict(int)
+    while node:
         path = []
         ascend_tree(node, path)
         if len(path) > 1:
-            patterns[tuple(path[1:])] = node.count
+            patterns[tuple(path[1:])] += node.count
         node = node.node_link
     return patterns
 
 def mine_tree(root, header, min_support, prefix, freq_items):
-    sorted_items = [item[0] for item in sorted(header.items(), key=lambda p: p[1][0], reverse=True)]
-    for base_item in sorted_items:
-        new_prefix = prefix.copy()
-        new_prefix.add(base_item)
-        freq_items.append((new_prefix, header[base_item][0]))
-        cond_patterns = find_prefix_path(base_item, header[base_item][1])
+    sorted_items = sorted(header.items(), key=lambda p: p[1][0], reverse=True)
+    for base_item, (count, node) in sorted_items:
+        new_prefix = prefix | {base_item}
+        freq_items.append((new_prefix, count))
+        cond_patterns = find_prefix_path(base_item, node)
         cond_tree, cond_header = create_tree(cond_patterns, min_support)
-        if cond_header is not None:
+        if cond_header:
             mine_tree(cond_tree, cond_header, min_support, new_prefix, freq_items)
 
 # Apriori and Association Rule Implementation
@@ -101,11 +93,7 @@ def generate_rules(freq_items, min_conf, transactions):
     return rules
 
 def get_support(itemset, transactions):
-    support = 0
-    for trans in transactions:
-        if itemset.issubset(trans):
-            support += 1
-    return support / len(transactions)
+    return sum(1 for trans in transactions if itemset.issubset(trans)) / len(transactions)
 
 # Recommendation System Implementation
 def recommend(rules, transaction):
