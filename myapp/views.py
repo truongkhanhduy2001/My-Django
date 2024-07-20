@@ -1,6 +1,10 @@
-
-
-
+# views.py
+from django.shortcuts import render
+from django.http import JsonResponse
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+from collections import defaultdict, Counter
+from django.http import HttpResponse
 
 # FP-Growth Implementation
 class TreeNode:
