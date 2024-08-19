@@ -16,7 +16,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 CORS_ALLOWED_ORIGINS = [
-    'https://book-store-eight-psi.vercel.app',
+    'https://book-store-eight-psi.vercel.app', 'http://localhost:3000'
 ]
 
 
